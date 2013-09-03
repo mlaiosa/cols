@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+
+import sys, pprint
+
+def common_prefix(l):
+	""" Given a list of strings, return the longest common prefix of all
+	strings.  common_prefix([]) == "" by definition. """
+	l = iter(l)
+	prefix = ""
+	try:
+		prefix = l.next()
+		while len(prefix) > 0:
+			string = l.next()
+			while not string.startswith(prefix):
+				prefix = prefix[:-1]
+	except StopIteration:
+		pass
+	return prefix
+
+def next_cell(s):
+	# Skip leading whitespace
+	quote_count = 0
+	s = s.lstrip()
+	for i, ch in enumerate(s):
+		if ch == '"':
+			if quote_count == 2:
+				# There are too many quotes.  Redo this ignoring quotes.
+				r = s.split()[0].strip()
+				return (r, s[len(r):])
+			quote_count += 1
+		if ch.isspace() and quote_count != 1:
+			return (s[:i], s[i:])
+	return (s, "")
+
+def split_row(s):
+	row = []
+	while True:
+		cell, s = next_cell(s)
+		if cell == "":
+			return row
+		row.append(cell)
+
+def main():
+	lines = sys.stdin.readlines()
+
+	# Determine the prefix and strip it off.  Remove trailing whitespace while
+	# we're at it.
+	prefix = common_prefix(lines)
+	prefix = prefix[:-len(prefix.lstrip())]
+	rows = [split_row(line) for line in lines]
+
+	num_columns = 0
+	for row in rows:
+		num_columns = max(num_columns, len(row))
+
+	column_widths = [0]*num_columns
+	for row in rows:
+		for i in xrange(len(row)):
+			column_widths[i] = max(column_widths[i], len(row[i]))
+	
+	for row in rows:
+		sys.stdout.write(prefix)
+		for i, cell in enumerate(row):
+			if i == len(row) - 1:
+				sys.stdout.write(cell)
+			else:
+				sys.stdout.write("%*s" % (-column_widths[i]-1, cell))
+		sys.stdout.write("\n")
+
+if __name__ == "__main__":
+	main()
