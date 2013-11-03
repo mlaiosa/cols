@@ -1,11 +1,19 @@
 import doctest, glob, os, os.path, sys
 import subprocess as S
+import cols
 
 from os.path import abspath, dirname, join
 
 test_dir = abspath(join(dirname(__file__), "tests"))
 
 def main():
+	# Run the doctests
+	fail_count, test_count = doctest.testmod(cols)
+	print "Passed %d of %d doctests" % (test_count-fail_count, test_count)
+	if fail_count != 0:
+		return fail_count
+	
+	# Run the integration tests
 	for fn in os.listdir(test_dir):
 		if not fn.endswith(".in"): continue
 		sys.stdout.write(fn + " ")

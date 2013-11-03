@@ -3,19 +3,19 @@
 import sys, pprint
 
 def whitespace_prefix(s):
-	""" Given a string s, return the longest prefix of s that consists solely
+	r""" Given a string s, return the longest prefix of s that consists solely
 	of whitespace 
 	
-	>>> whitespace_prefix(" dogs ")
-	" "
-	>>> whitespace_prefix("\tdogs ")
-	"\t"
-	>>> whitespace_prefix("dogs")
-	""
-	>>> whitespace_prefix("")
-	""
-	>>> whitespace_prefix("    ")
-	"    "
+	>>> whitespace_prefix(' dogs ')
+	' '
+	>>> whitespace_prefix('\tdogs ')
+	'\t'
+	>>> whitespace_prefix('dogs')
+	''
+	>>> whitespace_prefix('')
+	''
+	>>> whitespace_prefix('    ')
+	'    '
 	"""
 	for i in xrange(len(s)):
 		if not s[i].isspace():
