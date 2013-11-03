@@ -1,4 +1,4 @@
-import doctest, glob, os, os.path, sys
+import doctest, glob, os, os.path, sys, shlex
 import subprocess as S
 import cols
 
@@ -15,10 +15,15 @@ def main():
 	
 	# Run the integration tests
 	for fn in os.listdir(test_dir):
+		stem = fn[:-3]
 		if not fn.endswith(".in"): continue
-		sys.stdout.write(fn + " ")
+		sys.stdout.write(stem + " ")
 		sys.stdout.flush()
-		p = S.Popen([join(test_dir, "..", "cols")], 
+		try:
+			args = shlex.split(open(join(test_dir, stem + ".args")).readline())
+		except IOError:
+			args = []
+		p = S.Popen([join(test_dir, "..", "cols")] + args, 
 				stdin=open(join(test_dir, fn)), 
 				stdout=S.PIPE, stderr=S.PIPE)
 		out, err = p.communicate()
@@ -28,7 +33,7 @@ def main():
 		if err != "":
 			print "failed; output on STDERR" 
 			return 1
-		with open(join(test_dir, fn[:-3] + ".out"), "r") as fh:
+		with open(join(test_dir, stem + ".out"), "r") as fh:
 			if fh.read() != out:
 				print "failed; incorrect output on STDOUT"
 				return 1

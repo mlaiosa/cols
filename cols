@@ -83,7 +83,7 @@ def next_cell(s):
 			return (s[:i], s[i:])
 	return (s, "")
 
-def split_row(s):
+def split_row(s, num_cols=None):
 	"""Split a row into multiple cells
 
 	>>> split_row("a b c d e f g")
@@ -98,19 +98,38 @@ def split_row(s):
 	"""
 	row = []
 	while True:
+		if len(row)+1 == num_cols:
+			row.append(s.strip())
+			return row
 		cell, s = next_cell(s)
 		if cell == "":
 			return row
 		row.append(cell)
 
+class Options(object):
+	num_cols     = None
+	align_equals = False
+
+def parse_args():
+	o = Options()
+	if len(sys.argv) <= 1:
+		return o
+	if sys.argv[1] == '=':
+		o.align_equals = True
+	else:
+		try: o.num_cols = int(sys.argv[1])
+		except ValueError: pass
+	return o
+
 def main():
 	lines = sys.stdin.readlines()
+	opts = parse_args()
 
 	# Determine the prefix and strip it off.  Remove trailing whitespace while
 	# we're at it.
 	prefix = common_prefix(line for line in lines if line.strip() != "")
 	prefix = whitespace_prefix(prefix)
-	rows = [split_row(line) for line in lines]
+	rows = [split_row(line, opts.num_cols) for line in lines]
 
 	num_columns = 0
 	for row in rows:
