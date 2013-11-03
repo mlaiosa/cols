@@ -2,6 +2,27 @@
 
 import sys, pprint
 
+def whitespace_prefix(s):
+	""" Given a string s, return the longest prefix of s that consists solely
+	of whitespace 
+	
+	>>> whitespace_prefix(" dogs ")
+	" "
+	>>> whitespace_prefix("\tdogs ")
+	"\t"
+	>>> whitespace_prefix("dogs")
+	""
+	>>> whitespace_prefix("")
+	""
+	>>> whitespace_prefix("    ")
+	"    "
+	"""
+	for i in xrange(len(s)):
+		if not s[i].isspace():
+			return s[:i]
+	return s
+
+
 def common_prefix(l):
 	""" Given a list of strings, return the longest common prefix of all
 	strings.  common_prefix([]) == "" by definition. 
@@ -87,8 +108,8 @@ def main():
 
 	# Determine the prefix and strip it off.  Remove trailing whitespace while
 	# we're at it.
-	prefix = common_prefix(lines)
-	prefix = prefix[:-len(prefix.lstrip())]
+	prefix = common_prefix(line for line in lines if line.strip() != "")
+	prefix = whitespace_prefix(prefix)
 	rows = [split_row(line) for line in lines]
 
 	num_columns = 0
