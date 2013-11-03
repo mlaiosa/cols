@@ -4,7 +4,19 @@ import sys, pprint
 
 def common_prefix(l):
 	""" Given a list of strings, return the longest common prefix of all
-	strings.  common_prefix([]) == "" by definition. """
+	strings.  common_prefix([]) == "" by definition. 
+
+	>>> common_prefix([])
+	''
+	>>> common_prefix(["a","b","c"])
+	''
+	>>> common_prefix([" a", "  b", "   c"])
+	' '
+	>>> common_prefix(["", "asdf"])
+	''
+	>>> common_prefix(["singleton"])
+	'singleton'
+	"""
 	l = iter(l)
 	prefix = ""
 	try:
@@ -18,6 +30,24 @@ def common_prefix(l):
 	return prefix
 
 def next_cell(s):
+	"""Split a string into two parts - the contents of the next cell, and the
+	part of the string that comes after the next cell.  A few doc-tests are
+	provided in order to better document its interface than I can do with
+	prose; integration tests have primary responsiblity for testing this
+	function.
+
+	>>> next_cell("a b c d")
+	('a', ' b c d')
+	>>> next_cell(' b c d')
+	('b', ' c d')
+	>>> next_cell(' d')
+	('d', '')
+	>>> next_cell('')
+	('', '')
+	>>> next_cell(' ')
+	('', '')
+
+	"""
 	# Skip leading whitespace
 	quote_count = 0
 	s = s.lstrip()
@@ -33,6 +63,18 @@ def next_cell(s):
 	return (s, "")
 
 def split_row(s):
+	"""Split a row into multiple cells
+
+	>>> split_row("a b c d e f g")
+	['a', 'b', 'c', 'd', 'e', 'f', 'g']
+	>>> split_row("  a b c d e f g  ")
+	['a', 'b', 'c', 'd', 'e', 'f', 'g']
+	>>> split_row("")
+	[]
+	>>> split_row("    ")
+	[]
+
+	"""
 	row = []
 	while True:
 		cell, s = next_cell(s)
