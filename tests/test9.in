@@ -1,0 +1,7 @@
+= comes first
+when it comes last =
+char i = 3;
+const char j = 4
+I do not have a equals sign
+const struct foo the_foo = { i, j, 5 };
+const struct foo another_foo = { i, j, 5 };

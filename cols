@@ -131,6 +131,20 @@ def main():
 	prefix = whitespace_prefix(prefix)
 	rows = [split_row(line, opts.num_cols) for line in lines]
 
+	if opts.align_equals:
+		equals_columns = [None]*len(rows)
+		for i, row in enumerate(rows):
+			try: equals_columns[i] = row.index('=') - 1
+			except ValueError: pass
+		equals_column = max(equals_columns)
+		if equals_column is not None:
+			for i, row in enumerate(rows):
+				eq = equals_columns[i]
+				if eq is not None and eq < equals_column:
+					cols_to_insert = equals_column-eq
+					eq = max(0, eq)
+					row[eq:eq] = [""] * cols_to_insert
+
 	num_columns = 0
 	for row in rows:
 		num_columns = max(num_columns, len(row))
