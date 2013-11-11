@@ -110,20 +110,28 @@ class Options(object):
 	num_cols     = None
 	align_equals = False
 
-def parse_args():
+def parse_args(args):
 	o = Options()
-	if len(sys.argv) <= 1:
+	if len(args) > 2:
+		print "Too many arguemnts"
+		return None
+	if len(args) <= 1:
 		return o
-	if sys.argv[1] == '=':
+	if args[1] == '=':
 		o.align_equals = True
 	else:
-		try: o.num_cols = int(sys.argv[1])
-		except ValueError: pass
+		try: o.num_cols = int(args[1])
+		except ValueError:
+			print "Unable to parse %r" % args[1]
+			return None
 	return o
 
-def main():
+def main(args):
+	opts = parse_args(args)
+	if opts is None:
+		return 1
+
 	lines = sys.stdin.readlines()
-	opts = parse_args()
 
 	# Determine the prefix and strip it off.  Remove trailing whitespace while
 	# we're at it.
@@ -163,5 +171,7 @@ def main():
 				sys.stdout.write("%*s" % (-column_widths[i]-1, cell))
 		sys.stdout.write("\n")
 
+	return 0
+
 if __name__ == "__main__":
-	main()
+	sys.exit(main(sys.argv))
