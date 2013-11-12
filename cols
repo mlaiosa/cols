@@ -1,6 +1,93 @@
 #!/usr/bin/env python
 
-import sys, pprint
+import sys, re, itertools
+
+def is_integer(s):
+	"""
+	>>> is_integer("34")
+	True
+	>>> is_integer("0x1234abcd")
+	True
+	>>> is_integer("0644")
+	True
+	>>> is_integer("3.3")
+	False
+	>>> is_integer("steve jobs")
+	False
+	"""
+	try:
+		long(s, 0)
+		return True
+	except ValueError:
+		return False
+
+def align_column(values):
+	r"""Left-pad the values so that they line up naturally
+	>>> align_column(())
+	[]
+	>>> def t(i): print '\n'.join(align_column(i.split()))
+	>>> t("= += -= == j")
+	 =
+	+=
+	-=
+	==
+	j
+	>>> t("0 1 10 100 0x123f")
+	     0
+	     1
+	    10
+	   100
+	0x123f
+	>>> t("0 100.00 0.9 .9 1.")
+	  0
+	100.00
+	  0.9
+	   .9
+	  1.
+	>>> t("1 2 3")
+	1
+	2
+	3
+	"""
+	if len(values) == 0:
+		return []
+	centers = []
+	for value in values:
+		if re.match('[-=+*/&^%|]?=', value):
+			centers.append(len(value)-1)
+		elif is_integer(value):
+			centers.append(len(value))
+		elif value.endswith(',') and is_integer(value[:-1]):
+			centers.append(len(value)-1)
+		elif re.match(r'[0-9]*\.[0-9]*,?', value) and value != '.':
+			centers.append(value.index('.'))
+		else:
+			centers.append(None)
+	assert len(centers) == len(values)
+
+	max_center = max(centers)
+
+	v2 = []
+	for i, value in enumerate(values):
+		if centers[i] is None:
+			v2.append(value)
+		else:
+			v2.append(" " * (max_center-centers[i]) + value)
+	return v2
+
+def pad_column(col):
+	"""Make all elements of col the same length by appending spaces
+	>>> pad_column(list("abc"))
+	['a', 'b', 'c']
+	>>> pad_column([])
+	[]
+	>>> pad_column("a bc def".split())
+	['a  ', 'bc ', 'def']
+	"""
+	if len(col) == 0:
+		return []
+	width = max(len(s) for s in col)
+	return ["%*s" % (-width,s) for s in col]
 
 def whitespace_prefix(s):
 	r""" Given a string s, return the longest prefix of s that consists solely
@@ -153,22 +240,20 @@ def main(args):
 					eq = max(0, eq)
 					row[eq:eq] = [""] * cols_to_insert
 
-	num_columns = 0
-	for row in rows:
-		num_columns = max(num_columns, len(row))
 
-	column_widths = [0]*num_columns
-	for row in rows:
-		for i in xrange(len(row)):
-			column_widths[i] = max(column_widths[i], len(row[i]))
-	
-	for row in rows:
+	# This little gem transposes rows, filling in missing data with "".
+	columns = list(itertools.izip_longest(*rows, fillvalue=""))
+
+	for i, col in enumerate(columns):
+		col = align_column(col)
+		col = pad_column(col)
+		columns[i] = col
+
+	# Transpose back to rows to print
+	for row in itertools.izip(*columns):
+		row_str = ' '.join(row)
 		sys.stdout.write(prefix)
-		for i, cell in enumerate(row):
-			if i == len(row) - 1:
-				sys.stdout.write(cell)
-			else:
-				sys.stdout.write("%*s" % (-column_widths[i]-1, cell))
+		sys.stdout.write(row_str.rstrip())
 		sys.stdout.write("\n")
 
 	return 0
